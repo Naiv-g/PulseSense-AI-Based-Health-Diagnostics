@@ -1,5 +1,5 @@
 from jose import JWTError, jwt
-from passlib.context import CryptContext
+from passlib.context import CryptContext # For password hashing
 from datetime import datetime, timedelta
 from typing import Optional
 import mysql.connector
