@@ -16,12 +16,13 @@ class Database:
     
     def connect(self):
         try:
+            # Try connecting with provided password
             self.connection = mysql.connector.connect(
                 host=self.host,
                 user=self.user,
-                password=self.password,
+                password=self.password if self.password else None,
                 database=self.database,
-                port=self.port,
+                port=int(self.port) if self.port else 3306,
                 # Additional options for remote connections
                 connect_timeout=30,
                 buffered=True
@@ -29,7 +30,33 @@ class Database:
             print(f"Connected to MySQL database: {self.database} on {self.host}:{self.port}")
             return self.connection
         except Error as e:
-            print(f"Error connecting to MySQL: {e}")
+            error_msg = str(e)
+            print(f"Error connecting to MySQL: {error_msg}")
+            
+            # Provide helpful error messages
+            if "Access denied" in error_msg:
+                print("\n" + "="*60)
+                print("DATABASE CONNECTION ERROR - Access Denied")
+                print("="*60)
+                print("Possible solutions:")
+                print("1. Create a .env file in the backend/ directory with:")
+                print("   DB_HOST=localhost")
+                print("   DB_USER=root")
+                print("   DB_PASSWORD=your_mysql_password")
+                print("   DB_NAME=pulsesense")
+                print("   DB_PORT=3306")
+                print("\n2. Verify your MySQL root password is correct")
+                print("3. If MySQL has no password, leave DB_PASSWORD empty:")
+                print("   DB_PASSWORD=")
+                print("\n4. Ensure MySQL server is running")
+                print("="*60 + "\n")
+            elif "Can't connect" in error_msg or "Unknown MySQL server host" in error_msg:
+                print("\n" + "="*60)
+                print("DATABASE CONNECTION ERROR - Cannot Reach Server")
+                print("="*60)
+                print("Please ensure MySQL server is running and accessible.")
+                print("="*60 + "\n")
+            
             return None
     
     def get_connection(self):

@@ -61,3 +61,10 @@ class Token(BaseModel):
 
 class TokenData(BaseModel):
     username: Optional[str] = None
+
+class ChatbotQuery(BaseModel):
+    message: str
+
+class ChatbotResponse(BaseModel):
+    response: str
+    conversation_id: Optional[int] = None

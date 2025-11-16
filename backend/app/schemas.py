@@ -47,6 +47,15 @@ CREATE TABLE IF NOT EXISTS disease_symptoms (
     FOREIGN KEY (disease_id) REFERENCES diseases(id),
     FOREIGN KEY (symptom_id) REFERENCES symptoms(id)
 );
+
+CREATE TABLE IF NOT EXISTS chatbot_conversations (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    user_message TEXT NOT NULL,
+    bot_response TEXT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
 """
 
 # Sample data
