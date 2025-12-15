@@ -1,101 +1,245 @@
 # PulseSense – AI-Powered Health Diagnostics
 
-AI-assisted health companion that combines a FastAPI backend, MySQL persistence, and a Streamlit frontend. PulseSense lets users register, log in, manage medical records, run symptom checks powered by a lightweight RAG pipeline, and chat with a health-focused assistant. The backend initializes seed medical data on startup and exposes JWT-protected APIs; the frontend provides a polished multi-page experience.
+PulseSense is an AI-assisted health diagnostics platform that combines a **FastAPI backend**, **MySQL persistence**, and a **Streamlit frontend**. It enables users to securely manage medical records, perform symptom-based health checks using a lightweight RAG (Retrieval-Augmented Generation) pipeline, and interact with a health-focused chatbot.
 
-## Features
-- Secure auth (register/login) with JWT bearer tokens and bcrypt password hashing
-- Personal medical record management (create, list, delete)
-- Symptom checker with rule-based + RAG-style suggestions (disease, confidence, specialist, tests, precautions)
-- Health chatbot that stores conversations per user
-- Profile view and dashboard metrics in Streamlit
-- Built-in database bootstrap (tables, sample symptoms/diseases, mappings)
-- CORS enabled for local development
+This project is designed for both **end users** (to run and explore the application) and **developers** (to understand, extend, and contribute to the system).
+
+---
+
+## Key Features
+
+* Secure authentication (register/login) using **JWT bearer tokens** and **bcrypt password hashing**
+* Personal medical record management (create, view, delete)
+* AI-powered symptom checker with:
+
+  * Disease prediction
+  * Confidence score
+  * Recommended specialist
+  * Suggested medical tests
+  * Precautionary advice
+* Health chatbot with conversation history stored per user
+* User dashboard and profile view built with Streamlit
+* Automatic database bootstrapping with seed medical data
+* CORS-enabled backend for local development
+
+---
+
+## Tech Stack
+
+**Backend**
+
+* Python 3.10+
+* FastAPI
+* SQLAlchemy
+* MySQL 8.x
+* JWT (Authentication)
+* Sentence Transformers / Transformers (optional)
+* FAISS (optional, with graceful fallback)
+
+**Frontend**
+
+* Streamlit
+
+**AI / NLP**
+
+* Lightweight RAG pipeline
+* Rule-based fallback for reliability
+
+---
 
 ## Project Structure
-- `backend/` – FastAPI service (`app/main.py`) with auth, RAG agent, and DB access
-- `frontend/` – Streamlit UI (`app.py`) consuming the backend
-- `database/` – SQL bootstrap scripts and helper runner
+
+```
+PulseSense-AI-Based-Health-Diagnostics/
+│
+├── backend/          # FastAPI backend (auth, RAG agent, DB access)
+│   └── app/
+│       └── main.py
+│
+├── frontend/         # Streamlit frontend
+│   └── app.py
+│
+├── database/         # SQL bootstrap scripts and DB helpers
+│   └── init.sql
+│
+└── README.md
+```
+
+---
 
 ## Prerequisites
-- Python 3.10+
-- MySQL 8.x running locally (or reachable host)
-- Node is **not** required (frontend is Streamlit)
-- (Optional) GPU for faster transformer inference; CPU fallback is supported
+
+* Python 3.10 or higher
+* MySQL 8.x (local or remote)
+* Internet connection (for first-time model downloads)
+* GPU is optional (CPU fallback supported)
+
+> **Note:** Node.js is *not required*.
+
+---
 
 ## Quick Start
-1) **Clone & enter**  
-   ```bash
-   git clone <repo-url>
-   cd final dbms project
-   ```
 
-2) **Set up MySQL**  
-   - Create a database and user, or use root:
-   ```sql
-   CREATE DATABASE pulsesense;
-   ```
-   - Option A: run the seed script once:
-     ```bash
-     python database/run_init_sql.py   # uses database/init.sql
-     ```
-   - Option B: rely on backend auto-bootstrap (creates tables, inserts sample symptoms/diseases on startup).
+### 1. Clone the Repository
 
-3) **Configure environment**  
-   Create `backend/.env` (values shown are examples):
-   ```
-   DB_HOST=localhost
-   DB_PORT=3306
-   DB_USER=root
-   DB_PASSWORD=your_mysql_password
-   DB_NAME=pulsesense
-   SECRET_KEY=replace-with-strong-secret
-   ```
+```bash
+git clone https://github.com/Naiv-g/PulseSense-AI-Based-Health-Diagnostics.git
+cd PulseSense-AI-Based-Health-Diagnostics
+```
 
-4) **Backend setup & run**  
-   ```bash
-   cd backend
-   python -m venv .venv
-   .venv\Scripts\activate  # Windows
-   pip install -r requirements.txt
-   uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
-   ```
-   API docs: `http://localhost:8000/docs`
+---
 
-5) **Frontend setup & run**  
-   ```bash
-   cd frontend
-   python -m venv .venv
-   .venv\Scripts\activate
-   pip install -r requirements.txt
-   streamlit run app.py
-   ```
-   The frontend expects the backend at `http://localhost:8000` (see `frontend/app.py` `BACKEND_URL`).
+### 2. MySQL Setup
 
-## API Overview (selected)
-- `POST /register` – create user
-- `POST /login` – obtain JWT (`access_token`)
-- `GET /medical-records` – list current user records
-- `POST /medical-records` – create record
-- `DELETE /medical-records/{id}` – delete own record
-- `GET /symptoms` – list seed symptoms
-- `POST /predict-disease` – symptom-based suggestion (requires auth)
-- `POST /chatbot/query` – health chatbot (stores conversation)
-- `GET /rag-status` – diagnostics for RAG components
+Create a database:
 
-All protected routes require `Authorization: Bearer <token>` from `/login`.
+```sql
+CREATE DATABASE pulsesense;
+```
 
-## RAG / AI Notes
-- Uses a lightweight knowledge base with sentence-transformer embeddings and FAISS when available; falls back to a simple in-memory vector store.
-- Transformer models (e.g., `google/flan-t5-*`) download on first run; ensure internet or pre-cache.
-- If transformers/langchain imports fail, the agent downgrades gracefully to a rule-based flow.
+You can initialize the database in one of two ways:
 
-## Development Tips
-- Backend auto-creates tables and inserts sample data at startup; disable if you manage schema manually.
-- Update `SECRET_KEY` and DB credentials in production.
-- Streamlit UI uses session state for navigation; `BACKEND_URL` can be pointed to a remote API.
+**Option A – Manual initialization**
+
+```bash
+python database/run_init_sql.py
+```
+
+**Option B – Automatic bootstrap (recommended)**
+The backend automatically creates tables and inserts sample medical data on startup.
+
+---
+
+### 3. Environment Configuration
+
+Create a `.env` file inside the `backend/` directory:
+
+```
+DB_HOST=localhost
+DB_PORT=3306
+DB_USER=root
+DB_PASSWORD=your_mysql_password
+DB_NAME=pulsesense
+SECRET_KEY=replace-with-a-strong-secret
+```
+
+---
+
+### 4. Run the Backend
+
+```bash
+cd backend
+python -m venv .venv
+.venv\Scripts\activate   # Windows
+# source .venv/bin/activate  # Linux / macOS
+
+pip install -r requirements.txt
+uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+```
+
+* API Docs: `http://localhost:8000/docs`
+
+---
+
+### 5. Run the Frontend
+
+```bash
+cd frontend
+python -m venv .venv
+.venv\Scripts\activate
+pip install -r requirements.txt
+streamlit run app.py
+```
+
+The frontend connects to the backend via:
+
+```
+http://localhost:8000
+```
+
+(Editable in `frontend/app.py` as `BACKEND_URL`.)
+
+---
+
+## API Overview (Selected Endpoints)
+
+| Method | Endpoint                | Description                      |
+| ------ | ----------------------- | -------------------------------- |
+| POST   | `/register`             | Create a new user                |
+| POST   | `/login`                | Authenticate and receive JWT     |
+| GET    | `/medical-records`      | List user medical records        |
+| POST   | `/medical-records`      | Create a new medical record      |
+| DELETE | `/medical-records/{id}` | Delete a record                  |
+| GET    | `/symptoms`             | Fetch seed symptoms              |
+| POST   | `/predict-disease`      | Symptom-based disease prediction |
+| POST   | `/chatbot/query`        | Health chatbot query             |
+| GET    | `/rag-status`           | RAG system diagnostics           |
+
+All protected endpoints require:
+
+```
+Authorization: Bearer <access_token>
+```
+
+---
+
+## RAG / AI Architecture Notes
+
+* Uses sentence-transformer embeddings with FAISS when available
+* Falls back to an in-memory vector store if FAISS is unavailable
+* Transformer models (e.g., `google/flan-t5-*`) download on first run
+* If NLP dependencies fail, the system gracefully degrades to a rule-based engine
+
+This ensures the application remains functional even in constrained environments.
+
+---
+
+## Development & Contribution
+
+Contributions are welcome.
+
+1. Fork the repository
+2. Create a feature branch (`feature/your-feature-name`)
+3. Commit changes with clear messages
+4. Push and open a Pull Request
+
+Please ensure:
+
+* Code is clean and readable
+* APIs are documented where applicable
+* No credentials are committed
+
+---
+
+## Security Notes
+
+* Replace `SECRET_KEY` in production
+* Restrict CORS origins before deployment
+* Do not use root DB credentials in production
+
+---
 
 ## Troubleshooting
-- **MySQL access denied**: verify `.env` credentials and that MySQL is running on the specified port.
-- **Model download slow**: pre-download Hugging Face models or ensure a stable connection; GPU is optional.
-- **CORS issues**: CORS is open for development; tighten in production within `backend/app/main.py`.
 
+* **MySQL access denied**: Check `.env` credentials and ensure MySQL is running
+* **Slow model download**: Pre-download models or ensure stable internet
+* **CORS errors**: Update CORS settings in `backend/app/main.py`
+
+---
+
+## Disclaimer
+
+PulseSense is **not a medical device** and should not be used for clinical diagnosis or treatment decisions. It is intended strictly for educational and research purposes.
+
+---
+
+## Author
+
+Developed by **Naiv-g**
+GitHub: [https://github.com/Naiv-g](https://github.com/Naiv-g)
+
+---
+
+## License
+
+This project is licensed under the **MIT License** (or update if different).
