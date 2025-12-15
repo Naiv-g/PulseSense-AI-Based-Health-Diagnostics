@@ -238,8 +238,4 @@ PulseSense is **not a medical device** and should not be used for clinical diagn
 Developed by **Naiv-g**
 GitHub: [https://github.com/Naiv-g](https://github.com/Naiv-g)
 
----
 
-## License
-
-This project is licensed under the **MIT License** (or update if different).
